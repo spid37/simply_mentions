@@ -277,7 +277,13 @@ class MentionTextEditingController extends TextEditingController {
       return;
     }
 
-    _processTextChange();
+    // remove any mentions are have been altered
+    final removedMention = _processTextChangeMentionRemove();
+
+    if (!removedMention) {
+      /// if no changes to the mentions, process the text
+      _processTextChange();
+    }
 
     _previousText = text;
 
@@ -342,8 +348,74 @@ class MentionTextEditingController extends TextEditingController {
     }
   }
 
+  List<Diff> diffTextChange() {
+    return diff(_previousText, text);
+  }
+
+  bool _processTextChangeMentionRemove() {
+    List<Diff> differences = diffTextChange();
+
+    int currentTextIndex = 0;
+
+    bool mentionTextRemoved = false;
+
+    for (int i = 0; i < differences.length; ++i) {
+      Diff difference = differences[i];
+
+      int rangeStart = currentTextIndex;
+      int rangeEnd = currentTextIndex + difference.text.length;
+
+      // If we insert a character in a position then it should end the range on the last character, not after the last character
+      if (difference.operation != DIFF_DELETE) {
+        rangeEnd -= 1;
+      }
+
+      for (int x = _cachedMentions.length - 1; x >= 0; --x) {
+        // if the key has gone skip it
+        if (!_cachedMentions.asMap().containsKey(x)) continue;
+        final TextMention mention = _cachedMentions[x];
+
+        if (!bGuardDeletion) {
+          if (difference.operation != DIFF_EQUAL) {
+            if (rangeStart < mention.end && rangeEnd > mention.start) {
+              // remove mention ref
+              _cachedMentions.removeAt(x);
+              // if change is within mention text, remove the text
+              if (rangeStart >= mention.start && rangeEnd <= mention.end) {
+                var replaceText = "";
+                var cursorPosition = mention.start;
+                if (difference.operation == DIFF_INSERT) {
+                  replaceText = difference.text;
+                }
+
+                text = _previousText.replaceRange(
+                    mention.start, mention.end, replaceText);
+                selection = TextSelection.collapsed(
+                    offset: cursorPosition, affinity: TextAffinity.upstream);
+              }
+              mentionTextRemoved = true;
+              continue;
+            }
+          }
+        }
+      }
+      if (difference.operation == DIFF_EQUAL) {
+        currentTextIndex += difference.text.length;
+      }
+
+      if (difference.operation == DIFF_INSERT) {
+        currentTextIndex += difference.text.length;
+      }
+
+      if (difference.operation == DIFF_DELETE) {
+        currentTextIndex -= difference.text.length;
+      }
+    }
+    return mentionTextRemoved;
+  }
+
   void _processTextChange() {
-    List<Diff> differences = diff(_previousText, text);
+    List<Diff> differences = diffTextChange();
 
     int currentTextIndex = 0;
 
@@ -420,14 +492,6 @@ class MentionTextEditingController extends TextEditingController {
         }
       }
 
-      int rangeStart = currentTextIndex;
-      int rangeEnd = currentTextIndex + difference.text.length;
-
-      // If we insert a character in a position then it should end the range on the last character, not after the last character
-      if (difference.operation != DIFF_DELETE) {
-        rangeEnd -= 1;
-      }
-
       for (int x = _cachedMentions.length - 1; x >= 0; --x) {
         final TextMention mention = _cachedMentions[x];
 
@@ -436,16 +500,6 @@ class MentionTextEditingController extends TextEditingController {
             difference.operation == DIFF_INSERT) {
           mention.start += difference.text.length;
           mention.end += difference.text.length;
-        }
-
-        // Check for overlaps
-        if (!bGuardDeletion) {
-          if (difference.operation != DIFF_EQUAL) {
-            if (rangeStart < mention.end && rangeEnd > mention.start) {
-              _cachedMentions.removeAt(x);
-              continue;
-            }
-          }
         }
 
         // Not overlapping but we removed text in front of metions so we need to shift them
