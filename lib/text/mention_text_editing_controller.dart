@@ -77,7 +77,7 @@ class MentionTextEditingController extends TextEditingController {
   MentionTextEditingController({
     this.controllerToCopyTo,
     required this.mentionSyntaxes,
-    this.onSugggestionChanged,
+    this.onSuggestionChanged,
     required this.mentionBgColor,
     required this.mentionTextColor,
     required this.mentionTextStyle,
@@ -92,7 +92,7 @@ class MentionTextEditingController extends TextEditingController {
   final List<MentionSyntax> mentionSyntaxes;
 
   // Delegate called when suggestion has changed
-  Function(MentionSyntax? syntax, String?)? onSugggestionChanged;
+  Function(MentionSyntax? syntax, String?)? onSuggestionChanged;
 
   // Function to get a mention from an id, used to deconstruct markup on construct
   final MentionObject? Function(BuildContext, String) idToMentionObject;
@@ -343,8 +343,8 @@ class MentionTextEditingController extends TextEditingController {
     _mentionLength = null;
     _mentionSyntax = null;
 
-    if (onSugggestionChanged != null) {
-      onSugggestionChanged!(null, null);
+    if (onSuggestionChanged != null) {
+      onSuggestionChanged!(null, null);
     }
   }
 
@@ -365,8 +365,8 @@ class MentionTextEditingController extends TextEditingController {
             if (currentTextIndex <= _mentionStartingIndex! + _mentionLength! &&
                 currentTextIndex >= _mentionStartingIndex! + _mentionLength!) {
               _mentionLength = _mentionLength! + difference.text.length;
-              if (onSugggestionChanged != null) {
-                onSugggestionChanged!(
+              if (onSuggestionChanged != null) {
+                onSuggestionChanged!(
                     _mentionSyntax!,
                     text.substring(_mentionStartingIndex!,
                         _mentionStartingIndex! + _mentionLength!));
@@ -410,12 +410,12 @@ class MentionTextEditingController extends TextEditingController {
 
             // If we no longer have text after our mention sign then hide suggestions until we start typing again
             if (_mentionLength == 1) {
-              if (onSugggestionChanged != null) {
-                onSugggestionChanged!(null, null);
+              if (onSuggestionChanged != null) {
+                onSuggestionChanged!(null, null);
               }
             } else {
-              if (onSugggestionChanged != null) {
-                onSugggestionChanged!(
+              if (onSuggestionChanged != null) {
+                onSuggestionChanged!(
                     _mentionSyntax!,
                     text.substring(_mentionStartingIndex!,
                         _mentionStartingIndex! + _mentionLength!));
