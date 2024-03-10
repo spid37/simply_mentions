@@ -391,10 +391,11 @@ class MentionTextEditingController extends TextEditingController {
       if (difference.operation == DIFF_DELETE) {
         if (isMentioning()) {
           // If we removed our startingCharacter, chancel mentioning
-          // TODO: This detects if *ANY* character contains our mention character, which isn't ideal.. 
-          // But I have not yet figured out how to get whether we are currently deleting our starting character.. 
+          // TODO: This detects if *ANY* character contains our mention character, which isn't ideal..
+          // But I have not yet figured out how to get whether we are currently deleting our starting character..
           // We can, however, find out if we are deleting our starting character AFTER our mention start so that names with the starting character don't cancel mentioning when backspacing
-          if (difference.text.contains(_mentionSyntax!.startingCharacter) && currentTextIndex <= _mentionStartingIndex!) {
+          if (difference.text.contains(_mentionSyntax!.startingCharacter) &&
+              currentTextIndex <= _mentionStartingIndex!) {
             cancelMentioning();
           } else {
             if (currentTextIndex < _mentionStartingIndex!) {
