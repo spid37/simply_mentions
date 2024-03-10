@@ -8,12 +8,6 @@ import 'package:flutter/material.dart';
 // Mention object that store the id, display name and avatarurl of the mention
 // You can inherit from this to add your own custom data, should you need to
 
-// Keep in copy with diff.dart from diff_match_patch package
-
-const DIFF_DELETE = 1;
-const DIFF_INSERT = -1;
-const DIFF_EQUAL = 0;
-
 class MentionObject {
   MentionObject(
       {required this.id, required this.displayName, required this.avatarUrl});
@@ -349,7 +343,7 @@ class MentionTextEditingController extends TextEditingController {
   }
 
   void _processTextChange() {
-    List<Diff> differences = diff(text, _previousText);
+    List<Diff> differences = diff(_previousText, text);
 
     int currentTextIndex = 0;
 
