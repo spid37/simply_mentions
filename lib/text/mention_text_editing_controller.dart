@@ -57,8 +57,8 @@ class MentionSyntax {
 }
 
 // Local-only class to store mentions currently stored in the string visible to the user
-class _TextMention {
-  _TextMention(
+class TextMention {
+  TextMention(
       {required this.id,
       required this.display,
       required this.start,
@@ -106,7 +106,7 @@ class MentionTextEditingController extends TextEditingController {
   // EditingController to copy our text to, used for things like the Autocorrect widget
   TextEditingController? controllerToCopyTo;
 
-  final List<_TextMention> _cachedMentions = [];
+  final List<TextMention> _cachedMentions = [];
 
   // Text style for the mention
   final TextStyle mentionTextStyle;
@@ -119,6 +119,8 @@ class MentionTextEditingController extends TextEditingController {
   int? _mentionStartingIndex;
   int? _mentionLength;
   MentionSyntax? _mentionSyntax;
+
+  List<TextMention> get mentions => _cachedMentions;
 
   @override
   void dispose() {
@@ -162,7 +164,7 @@ class MentionTextEditingController extends TextEditingController {
             final int indexToEndInsertion =
                 indexToInsertMention + insertText.length;
 
-            _cachedMentions.add(_TextMention(
+            _cachedMentions.add(TextMention(
                 id: mentionId,
                 display: insertText,
                 start: indexToInsertMention,
@@ -211,7 +213,7 @@ class MentionTextEditingController extends TextEditingController {
     int lastStartingRunStart = 0;
 
     for (int i = 0; i < _cachedMentions.length; ++i) {
-      final _TextMention mention = _cachedMentions[i];
+      final TextMention mention = _cachedMentions[i];
 
       final int indexToEndRegular = mention.start;
 
@@ -244,7 +246,7 @@ class MentionTextEditingController extends TextEditingController {
     int lastStartingRunStart = 0;
 
     for (int i = 0; i < _cachedMentions.length; ++i) {
-      final _TextMention mention = _cachedMentions[i];
+      final TextMention mention = _cachedMentions[i];
 
       final int indexToEndRegular = mention.start;
 
@@ -299,7 +301,7 @@ class MentionTextEditingController extends TextEditingController {
     final int mentionVisibleTextEnd =
         _mentionStartingIndex! + mention.displayName.length + 1;
 
-    _cachedMentions.add(_TextMention(
+    _cachedMentions.add(TextMention(
         id: mention.id,
         display: mention.displayName,
         start: _mentionStartingIndex!,
@@ -330,7 +332,7 @@ class MentionTextEditingController extends TextEditingController {
       _mentionSyntax != null;
 
   void _sortMentions() {
-    _cachedMentions.sort((_TextMention a, _TextMention b) {
+    _cachedMentions.sort((TextMention a, TextMention b) {
       return a.start - b.start;
     });
   }
@@ -432,7 +434,7 @@ class MentionTextEditingController extends TextEditingController {
       }
 
       for (int x = _cachedMentions.length - 1; x >= 0; --x) {
-        final _TextMention mention = _cachedMentions[x];
+        final TextMention mention = _cachedMentions[x];
 
         // Not overlapping but we inserted text in front of metions so we need to shift them
         if (mention.start >= currentTextIndex &&
