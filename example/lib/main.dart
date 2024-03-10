@@ -12,8 +12,13 @@ final List<MentionObject> documentMentions = [];
 void main() {
   // Insert a default mention to have data for setMarkupText example
   documentMentions.add(MentionObject(
-      id: "ExampleId",
+      id: "ExampleId-1",
       displayName: "Jane Doe",
+      avatarUrl: "https://placekitten.com/50/50"));
+
+  documentMentions.add(MentionObject(
+      id: "ExampleId-2",
+      displayName: "John Doe",
       avatarUrl: "https://placekitten.com/50/50"));
 
   // Generate 100 random mentions
@@ -73,8 +78,8 @@ class _ExampleState extends State<Example> {
               documentMentions.firstWhere((element) => element.id == id));
 
       // Set markup text, any text that is the raw text that will be saved
-      mentionTextEditingController!.setMarkupText(
-          context, "Hello <###@ExampleId###>, how are you doing?");
+      mentionTextEditingController!.setMarkupText(context,
+          "Hello <###@ExampleId-1###> and <###@ExampleId-2###>, how are you doing?");
 
       mentionTextEditingController!.addListener(() {
         setState(() {});
