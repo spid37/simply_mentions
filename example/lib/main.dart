@@ -54,7 +54,6 @@ class Example extends StatefulWidget {
 
 class _ExampleState extends State<Example> {
   MentionTextEditingController? mentionTextEditingController;
-  FocusNode focusNode = FocusNode();
 
   // didChangeDependencies and not initState because we need to access context
   @override
@@ -69,7 +68,7 @@ class _ExampleState extends State<Example> {
           mentionTextColor: Theme.of(context).colorScheme.onPrimary,
           runTextStyle: TextStyle(color: Colors.white),
           mentionTextStyle: TextStyle(),
-          onSugggestionChanged: onSuggestionChanged,
+          onSuggestionChanged: onSuggestionChanged,
           idToMentionObject: (BuildContext context, String id) =>
               documentMentions.firstWhere((element) => element.id == id));
 
@@ -81,8 +80,6 @@ class _ExampleState extends State<Example> {
         setState(() {});
       });
     }
-
-    focusNode.requestFocus();
   }
 
   void onSuggestionChanged(MentionSyntax? syntax, String? fullSearchString) {
@@ -123,11 +120,11 @@ class _ExampleState extends State<Example> {
                 },
                 splashColor: Theme.of(context).highlightColor,
                 child: Row(children: [
-                  Image.network(
-                    element.avatarUrl,
-                    width: 25,
-                    height: 25,
-                  ),
+                  // Image.network(
+                  //   element.avatarUrl,
+                  //   width: 25,
+                  //   height: 25,
+                  // ),
                   SizedBox(
                     width: 6,
                   ),
@@ -167,46 +164,69 @@ class _ExampleState extends State<Example> {
   Widget build(BuildContext context) {
     // Create a Portal at the top of your widget/page, can be done at the root of your app as well
     return Portal(
-      child: Material(
-          child: Center(
-              child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 300),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Text("Enter your text"),
-                    SizedBox(
-                      height: 6,
-                    ),
-                    // Create a portal target where the mentions list should show up with an alignement of your choosing
-                    PortalTarget(
-                        visible: mentionTextEditingController!.isMentioning(),
-                        portalFollower: getMentions(),
-                        anchor: Aligned(
-                          follower: Alignment.bottomLeft,
-                          target: Alignment.topLeft,
-                          widthFactor: 1,
-                          backup: const Aligned(
-                            follower: Alignment.bottomLeft,
-                            target: Alignment.topLeft,
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text("Example"),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 300),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Text("Enter your text"),
+                      SizedBox(
+                        height: 6,
+                      ),
+                      // Create a portal target where the mentions list should show up with an alignement of your choosing
+                      PortalTarget(
+                          visible: mentionTextEditingController!.isMentioning(),
+                          portalFollower: getMentions(),
+                          anchor: Aligned(
+                            follower: Alignment.topLeft,
+                            target: Alignment.bottomLeft,
                             widthFactor: 1,
+                            backup: const Aligned(
+                              follower: Alignment.bottomLeft,
+                              target: Alignment.topLeft,
+                              widthFactor: 1,
+                            ),
                           ),
-                        ),
-                        child: TextField(
-                          decoration:
-                              InputDecoration(border: OutlineInputBorder()),
-                          focusNode: focusNode,
-                          maxLines: null,
-                          minLines: 5,
-                          controller: mentionTextEditingController,
-                        )),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text("Resulting markdown"),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    // Pass the inline syntaxes of your choosing and a builder for the corresponding syntax.
-                    MarkdownBody(
+                          child: TextField(
+                            decoration:
+                                InputDecoration(border: OutlineInputBorder()),
+                            maxLines: null,
+                            minLines: 5,
+                            controller: mentionTextEditingController,
+                          )),
+                    ]),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text("Resulting text"),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(mentionTextEditingController!.text),
+                  ),
+                ),
+                Text("Resulting markup text"),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(mentionTextEditingController!.getMarkupText()),
+                  ),
+                ),
+
+                Text("Resulting markdown"),
+                // Pass the inline syntaxes of your choosing and a builder for the corresponding syntax.
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: MarkdownBody(
                       data: mentionTextEditingController!.getMarkupText(),
                       softLineBreak: true,
                       builders: {
@@ -216,8 +236,37 @@ class _ExampleState extends State<Example> {
                         })
                       },
                       inlineSyntaxes: [DocumentMention()],
-                    )
-                  ])))),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text("Resulting mentions"),
+                ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: mentionTextEditingController?.mentions.length ?? 0,
+                  separatorBuilder: (context, i) {
+                    return const Divider();
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    final mention =
+                        mentionTextEditingController!.mentions[index];
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("""idx: $index
+            id: ${mention.id}
+            display: ${mention.display}
+            position: ${mention.start},${mention.end}"""),
+                      ),
+                    );
+                  },
+                )
+              ],
+            ),
+          )),
     );
   }
 }
