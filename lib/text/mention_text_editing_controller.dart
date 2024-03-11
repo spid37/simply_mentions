@@ -495,6 +495,9 @@ class MentionTextEditingController extends TextEditingController {
       for (int x = _cachedMentions.length - 1; x >= 0; --x) {
         final TextMention mention = _cachedMentions[x];
 
+        // keep mention position if it matches position.
+        if (!hasMentionShifted(mention)) continue;
+
         // Not overlapping but we inserted text in front of metions so we need to shift them
         if (mention.start >= currentTextIndex &&
             difference.operation == DIFF_INSERT) {
@@ -522,5 +525,15 @@ class MentionTextEditingController extends TextEditingController {
         currentTextIndex -= difference.text.length;
       }
     }
+  }
+
+  bool hasMentionShifted(TextMention mention) {
+    if (mention.end > text.length) return true;
+    final maybeMention = text.substring(mention.start, mention.end);
+    final mentionName = "${mention.syntax.startingCharacter}${mention.display}";
+    if (maybeMention != mentionName) return true;
+
+    // mention matches text in position
+    return false;
   }
 }
