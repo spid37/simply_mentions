@@ -448,6 +448,9 @@ class MentionTextEditingController extends TextEditingController {
               _mentionStartingIndex = currentTextIndex;
               _mentionLength = 1;
               _mentionSyntax = syntax;
+              if (onSuggestionChanged != null) {
+                onSuggestionChanged!(_mentionSyntax!, syntax.startingCharacter);
+              }
               break;
             }
           }
@@ -475,18 +478,11 @@ class MentionTextEditingController extends TextEditingController {
             _mentionLength = _mentionLength! - difference.text.length;
             assert(_mentionLength! >= 0);
 
-            // If we no longer have text after our mention sign then hide suggestions until we start typing again
-            if (_mentionLength == 1) {
-              if (onSuggestionChanged != null) {
-                onSuggestionChanged!(null, null);
-              }
-            } else {
-              if (onSuggestionChanged != null) {
-                onSuggestionChanged!(
-                    _mentionSyntax!,
-                    text.substring(_mentionStartingIndex!,
-                        _mentionStartingIndex! + _mentionLength!));
-              }
+            if (onSuggestionChanged != null) {
+              onSuggestionChanged!(
+                  _mentionSyntax!,
+                  text.substring(_mentionStartingIndex!,
+                      _mentionStartingIndex! + _mentionLength!));
             }
           }
         }
